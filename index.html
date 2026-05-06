@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hiring Pro - Ultimate Edition</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables with Dark Mode Support */
+        :root { 
+            --bg-main: #f8fafc; --bg-card: #ffffff; --text-main: #0f172a; --text-muted: #64748b; 
+            --primary: #3b82f6; --secondary: #8b5cf6; --success: #10b981; --danger: #ef4444; 
+            --warning: #f59e0b; --sidebar-bg: #0f172a; --sidebar-text: #94a3b8; --border: #e2e8f0;
+            --glow: rgba(59, 130, 246, 0.4); --input-bg: #f8fafc;
+        }
+        .dark-theme {
+            --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border: #334155; --sidebar-bg: #020617; --input-bg: #0f172a;
+        }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; scroll-behavior: smooth; transition: background-color 0.3s, color 0.3s; }
+        
+        .landing-nav { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 15px 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); transition: 0.3s; }
+        .logo { font-size: 1.6em; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; cursor: pointer; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-main); font-weight: 600; cursor: pointer; transition: color 0.3s; }
+        .btn-gradient { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white !important; padding: 12px 28px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px var(--glow); display: inline-flex; align-items: center; gap: 8px; }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--glow); }
+        .theme-toggle { background: transparent; border: none; font-size: 1.5em; color: var(--text-main); cursor: pointer; }
+
+        .hero { text-align: center; padding: 120px 20px; background: var(--bg-card); position: relative; }
+        .hero h1 { font-size: 4em; margin-bottom: 20px; color: var(--text-main); font-weight: 800; letter-spacing: -2px; line-height: 1.1; }
+        .hero p { font-size: 1.25em; color: var(--text-muted); max-width: 650px; margin: auto; margin-bottom: 40px; line-height: 1.7; }
+        
+        .footer { background: var(--sidebar-bg); color: white; padding: 60px 50px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; border-top: 1px solid #1e293b; }
+        .footer h3 { color: #818cf8; margin-top: 0; font-size: 1.2em; margin-bottom: 20px; }
+        .footer p, .footer a { color: var(--sidebar-text); text-decoration: none; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 0.95em; }
+
+        #auth-section { display: none; max-width: 420px; margin: 100px auto; background: var(--bg-card); padding: 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 1px solid var(--border); position: relative; }
+        .input-group { width: 100%; padding: 14px 16px; margin: 12px 0; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; font-size: 1em; background: var(--input-bg); color: var(--text-main); outline: none; transition: all 0.3s; }
+        .input-group:focus { border-color: var(--primary); }
+        .btn-full { width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 1.05em; cursor: pointer; border: none; transition: all 0.3s; margin-top: 10px; }
+        .btn-login { background: var(--text-main); color: var(--bg-card); }
+        .btn-register { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); }
+
+        #dashboard-layout { display: none; grid-template-columns: 280px 1fr; height: 100vh; width: 100vw; background: var(--bg-main); overflow: hidden; }
+        .sidebar { background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; height: 100%; border-right: 1px solid #1e293b; z-index: 10; }
+        .sidebar-brand { padding: 30px 25px; font-size: 1.6em; font-weight: 800; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 12px; }
+        .sidebar-menu { list-style: none; padding: 20px 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+        .sidebar-menu li { padding: 16px 25px; color: var(--sidebar-text); font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 15px; border-left: 4px solid transparent; font-size: 1.05em; margin: 5px 0; }
+        .sidebar-menu li:hover, .sidebar-menu li.active { color: white; background: rgba(255,255,255,0.05); border-left-color: var(--primary); }
+        .user-profile { padding: 25px; border-top: 1px solid #1e293b; display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; }
+
+        .main-content { padding: 40px; overflow-y: auto; height: 100%; box-sizing: border-box; scroll-behavior: smooth; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .header h2 { margin: 0; font-size: 2em; color: var(--text-main); font-weight: 800; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: var(--bg-card); padding: 25px; border-radius: 16px; border: 1px solid var(--border); display: flex; align-items: center; gap: 20px; transition: transform 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8em; }
+        .icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--primary); }
+        .icon-green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .icon-yellow { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--secondary); }
+        .stat-info h4 { margin: 0; color: var(--text-muted); font-size: 0.8em; text-transform: uppercase; font-weight: 600; }
+        .stat-info h2 { margin: 5px 0 0 0; font-size: 2.2em; color: var(--text-main); font-weight: 800; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding-bottom: 50px; }
+        .glass-card { background: var(--bg-card); padding: 35px; border-radius: 20px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .glass-card h3 { font-size: 1.4em; margin-top: 0; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+        
+        .file-upload-wrapper { position: relative; border: 2px dashed var(--border); border-radius: 16px; padding: 30px 20px; text-align: center; margin: 25px 0; background: var(--input-bg); cursor: pointer; }
+        .file-upload-wrapper input[type="file"] { opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; }
+        .file-upload-wrapper i { font-size: 3em; color: var(--primary); margin-bottom: 10px; }
+        
+        .result-box { margin-top: 25px; padding: 20px; border-radius: 12px; background: var(--input-bg); border-left: 5px solid var(--primary); font-weight: 500; display: none; line-height: 1.6; color: var(--text-main); }
+        .chart-container { position: relative; height: 320px; width: 100%; margin-top: 30px; }
+
+        /* Kanban Board */
+        .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .kanban-column { background: var(--input-bg); border-radius: 12px; padding: 15px; min-height: 400px; border: 1px solid var(--border); }
+        .kanban-column h4 { margin: 0 0 15px 0; font-size: 1.1em; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        .kanban-column h4 span { background: var(--primary); color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.8em; }
+        .kanban-card { background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border); cursor: grab; display: flex; flex-direction: column; gap: 8px; transition: transform 0.2s; }
+        .kanban-card:active { cursor: grabbing; transform: scale(0.98); }
+        .kanban-card h5 { margin: 0; font-size: 1em; color: var(--text-main); }
+        .kanban-card p { margin: 0; font-size: 0.85em; color: var(--text-muted); }
+
+        /* Chat UI */
+        .chat-container { display: flex; flex-direction: column; height: 350px; background: var(--input-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-top: 20px; }
+        .chat-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .chat-message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 0.95em; line-height: 1.5; }
+        .msg-user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
+        .msg-ai { align-self: flex-start; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); border-bottom-left-radius: 2px; }
+        .chat-input-area { display: flex; padding: 15px; background: var(--bg-card); border-top: 1px solid var(--border); }
+        .chat-input { flex-grow: 1; border: 1px solid var(--border); border-radius: 8px; padding: 10px 15px; background: var(--input-bg); color: var(--text-main); outline: none; }
+        .chat-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; margin-left: 10px; cursor: pointer; }
+
+        /* Toast Notification */
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--success); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; font-weight: bold; transform: translateX(-50%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: visibility 0.5s, opacity 0.5s linear; opacity: 0; }
+        #toast.show { visibility: visible; opacity: 1; }
+
+        /* Video Recorder UI Styles */
+        .video-studio { display: flex; gap: 15px; margin-top: 20px; background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .video-screen { flex: 1; background: #000; border-radius: 12px; overflow: hidden; position: relative; min-height: 250px; display: flex; align-items: center; justify-content: center; }
+        .video-controls { display: flex; flex-direction: column; gap: 10px; width: 140px; justify-content: center; }
+        #live-video, #playback-video { width: 100%; max-height: 250px; object-fit: cover; }
+        .rec-btn { background: #334155; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .rec-btn:hover:not(:disabled) { filter: brightness(1.2); }
+        .rec-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .recording-dot { color: #ef4444; animation: blink 1s infinite; position: absolute; top: 15px; right: 15px; font-size: 1.2em; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="toast"><i class="fa-solid fa-envelope-circle-check"></i> Automated Email Sent to Candidate!</div>
+
+    <nav class="landing-nav" id="landing-nav">
+        <div class="logo" onclick="showSection('landing')"><i class="fa-solid fa-rocket"></i> AI Hiring Pro</div>
+        <div class="nav-links">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+            <a onclick="showSection('landing')">Home</a>
+            <button class="btn-gradient" onclick="showSection('auth')"><i class="fa-solid fa-user-lock"></i> Client Login</button>
+        </div>
+    </nav>
+
+    <div id="landing-section">
+        <div class="hero">
+            <h1>Hire Smarter.<br>Interview Faster.</h1>
+            <p>Empower your HR team with enterprise-grade AI models. Manage pipelines, Auto-Generate Cover letters, and conduct Live AI Video Interviews efficiently.</p>
+            <button class="btn-gradient" style="font-size: 1.25em; padding: 18px 45px;" onclick="showSection('auth')">Launch Workspace <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+        <footer class="footer">
+            <div><h3><i class="fa-solid fa-address-card"></i> Contact Info</h3><p>+91 9893807687</p><p>aihiringpro0731@gmail.com</p></div>
+            <div><h3><i class="fa-solid fa-microchip"></i> Core Engine</h3><p>NLP Resume Parsing</p><p>Generative AI Cover Letters</p><p>Live Video AI Scoring</p></div>
+        </footer>
+    </div>
+
+    <div id="auth-section">
+        <h2 style="text-align: center; color: var(--primary); margin-top: 0;"><i class="fa-solid fa-shield-halved"></i> Secure Access</h2>
+        <input type="text" id="username" class="input-group" placeholder="Enter Admin Username">
+        <input type="password" id="password" class="input-group" placeholder="Enter Password">
+        <button class="btn-full btn-login" onclick="loginUser()">Login to Dashboard</button>
+        <button class="btn-full btn-register" onclick="registerUser()">Create Admin Account</button>
+        <p id="auth-msg" style="color: var(--danger); text-align: center; margin-top: 20px; font-weight: 600;"></p>
+    </div>
+
+    <div id="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-brand"><i class="fa-solid fa-rocket" style="color: var(--primary);"></i> AI Hiring Pro</div>
+            <ul class="sidebar-menu">
+                <li class="active" onclick="scrollToSection('overview')"><i class="fa-solid fa-chart-pie"></i> Overview</li>
+                <li onclick="scrollToSection('video-tool')"><i class="fa-solid fa-video"></i> Live Video AI</li>
+                <li onclick="scrollToSection('kanban-tool')"><i class="fa-solid fa-chess-board"></i> ATS Board & Automation</li>
+                <li onclick="scrollToSection('genai-tool')"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Cover Letter Maker</li>
+                <li onclick="scrollToSection('resume-tool')"><i class="fa-solid fa-file-pdf"></i> Resume Engine & Skills</li>
+                <li onclick="scrollToSection('chat-tool')"><i class="fa-solid fa-message"></i> HR Assistant Chat</li>
+            </ul>
+            <div class="user-profile">
+                <div class="avatar" id="user-avatar">A</div>
+                <div style="flex-grow: 1;"><div style="font-weight: 600; color: white;" id="user-greeting">Admin</div><div style="font-size: 0.8em; color: var(--success);">System Online</div></div>
+                <button class="theme-toggle" onclick="toggleTheme()" style="color:white; font-size:1.2em; margin-right:10px;"><i class="fa-solid fa-moon" id="sidebar-theme-icon"></i></button>
+                <i class="fa-solid fa-power-off" style="color: var(--danger); cursor: pointer; font-size: 1.2em;" onclick="logout()"></i>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="main-scroll-area">
+            <div class="header" id="overview">
+                <h2>System Analytics</h2>
+                <div style="color: var(--text-muted); font-weight: 500;"><span id="current-date"></span></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon icon-blue"><i class="fa-solid fa-brain"></i></div><div class="stat-info"><h4>Total Scans</h4><h2 id="total-scans">0</h2></div></div>
+                <div class="stat-card"><div class="stat-icon icon-green"><i class="fa-solid fa-file-contract"></i></div><div class="stat-info"><h4>Resumes Done</h4><h2 id="resume-count">0</h2></div></div>
+                <div class="stat-card"><div class="stat-icon icon-yellow"><i class="fa-solid fa-video"></i></div><div class="stat-info"><h4>Video AI Scans</h4><h2 id="video-count">0</h2></div></div>
+                <div class="stat-card"><div class="stat-icon icon-purple"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div class="stat-info"><h4>Gen AI Actions</h4><h2 id="genai-count">0</h2></div></div>
+            </div>
+
+            <div class="dashboard-grid">
+
+                <!-- NEW: Live Video AI Studio -->
+                <div class="glass-card" id="video-tool" style="grid-column: span 2;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #eab308;"></div>
+                    <h3><i class="fa-solid fa-video" style="color: #eab308;"></i> Live Interview Studio & AI Analysis</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95em;">Record candidate interviews directly from the browser. AI will instantly analyze facial expressions, audio confidence, and detect any proctoring violations.</p>
+                    
+                    <div class="video-studio">
+                        <div class="video-screen">
+                            <!-- Placeholder Icon -->
+                            <i class="fa-solid fa-video-slash" id="cam-placeholder" style="color: #475569; font-size: 4em;"></i>
+                            <!-- Live Camera Feed -->
+                            <video id="live-video" autoplay muted style="display: none;"></video>
+                            <!-- Recorded Video Playback -->
+                            <video id="playback-video" controls style="display: none;"></video>
+                            <!-- Recording Dot -->
+                            <i class="fa-solid fa-circle recording-dot" id="rec-dot"></i>
+                        </div>
+                        
+                        <div class="video-controls">
+                            <button class="rec-btn" id="btn-start-cam" onclick="startCamera()"><i class="fa-solid fa-camera"></i> Start Cam</button>
+                            <button class="rec-btn" id="btn-start-rec" style="background: #ef4444;" onclick="startRecording()" disabled><i class="fa-solid fa-circle"></i> Record</button>
+                            <button class="rec-btn" id="btn-stop-rec" style="background: #64748b;" onclick="stopRecording()" disabled><i class="fa-solid fa-square"></i> Stop</button>
+                        </div>
+                    </div>
+                    
+                    <button id="btn-video" class="btn-gradient" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #ca8a04, #eab308); margin-top: 15px;" onclick="analyzeRecordedVideo()" disabled>
+                        <i class="fa-solid fa-microchip"></i> Start Deep AI Analysis
+                    </button>
+                    
+                    <div id="video-results" class="result-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"></div>
+                </div>
+                
+                <!-- ATS Kanban Board -->
+                <div class="glass-card" id="kanban-tool" style="grid-column: span 2;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--warning);"></div>
+                    <h3><i class="fa-solid fa-chess-board" style="color: var(--warning);"></i> ATS Kanban Board (With Automation)</h3>
+                    <p style="color: var(--text-muted);">Drag a candidate to 'Shortlisted' or 'Interviewing' to trigger automated Emails.</p>
+                    
+                    <div class="kanban-board">
+                        <div class="kanban-column" id="col-applied" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <h4>Applied <span id="cnt-applied">3</span></h4>
+                            <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="card-1"><h5>Rahul Sharma</h5><p>Backend Developer</p></div>
+                            <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="card-2"><h5>Priya Singh</h5><p>Data Analyst</p></div>
+                            <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="card-3"><h5>Amit Kumar</h5><p>Frontend Dev</p></div>
+                        </div>
+                        <div class="kanban-column" id="col-shortlisted" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <h4>Shortlisted <span id="cnt-shortlisted">1</span></h4>
+                            <div class="kanban-card" draggable="true" ondragstart="drag(event)" id="card-4"><h5>Sneha Gupta</h5><p>UI/UX Designer</p></div>
+                        </div>
+                        <div class="kanban-column" id="col-interview" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <h4>Interviewing <span id="cnt-interview">0</span></h4>
+                        </div>
+                        <div class="kanban-column" id="col-hired" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <h4>Hired / Offer <span id="cnt-hired">0</span></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generative AI Cover Letter -->
+                <div class="glass-card" id="genai-tool" style="grid-column: span 2;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #ec4899;"></div>
+                    <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: #ec4899;"></i> Magic Cover Letter Generator</h3>
+                    <p style="color: var(--text-muted);">Uses Generative AI to read the uploaded resume and automatically craft a personalized cover letter for the specified Job Description.</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <textarea id="job-desc" class="input-group" rows="4" placeholder="Paste full Job Description here..."></textarea>
+                        <div class="file-upload-wrapper" style="margin: 12px 0; padding: 20px;">
+                            <i class="fa-solid fa-file-pdf"></i><h4 style="margin:0;">Select Resume</h4>
+                            <input type="file" id="cl-resume" accept=".pdf" onchange="updateFileName('cl-resume', 'cl-file-name')">
+                            <p id="cl-file-name" style="margin: 5px 0 0 0; color: var(--primary);"></p>
+                        </div>
+                    </div>
+                    <button id="btn-cl" class="btn-gradient" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #db2777, #ec4899);" onclick="generateCoverLetter()"><i class="fa-solid fa-pen-nib"></i> Generate Cover Letter</button>
+                    <div id="cl-results" class="result-box" style="white-space: pre-wrap; font-size: 0.95em; border-color: #ec4899;"></div>
+                </div>
+
+                <!-- Resume Tool with Missing Skills -->
+                <div class="glass-card" id="resume-tool">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary);"></div>
+                    <h3><i class="fa-solid fa-file-pdf" style="color: var(--primary);"></i> Semantic Resume Match</h3>
+                    <div class="file-upload-wrapper">
+                        <i class="fa-solid fa-cloud-arrow-up"></i><h4>Drag & Drop Resume PDF</h4>
+                        <input type="file" id="resumeFile" accept=".pdf" onchange="updateFileName('resumeFile', 'resume-file-name')">
+                        <p id="resume-file-name" style="color: var(--primary); font-weight: 600;"></p>
+                    </div>
+                    <button id="btn-resume" class="btn-gradient" style="width: 100%; justify-content: center;" onclick="analyzeResume()"><i class="fa-solid fa-magnifying-glass"></i> Run AI NLP Match</button>
+                    <div id="resume-results" class="result-box"></div>
+                    <div class="chart-container" style="display: none; height: 250px;" id="resumeChartDiv"><canvas id="resumeChart"></canvas></div>
+                </div>
+
+                <!-- HR Chat AI -->
+                <div class="glass-card" id="chat-tool">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--success);"></div>
+                    <h3><i class="fa-solid fa-message" style="color: var(--success);"></i> AI Recruiting Assistant</h3>
+                    <div class="chat-container">
+                        <div class="chat-box" id="chat-box">
+                            <div class="chat-message msg-ai">Hello! I am your AI. Ask me things like "Who is the best match?" or "What are the missing skills?"</div>
+                        </div>
+                        <div id="chat-typing" style="display:none; font-style:italic; font-size:0.8em; margin:5px 20px;">AI is typing...</div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" class="chat-input" placeholder="Type query..." onkeypress="handleChatEnter(event)">
+                            <button class="chat-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+    const backendURL = "http://127.0.0.1:8000";
+    let currentUser = "";
+    let resumeChartInstance = null;
+    
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // --- DARK MODE LOGIC ---
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        let icon1 = document.getElementById('theme-icon');
+        let icon2 = document.getElementById('sidebar-theme-icon');
+        let isDark = document.body.classList.contains('dark-theme');
+        let newIcon = isDark ? 'fa-sun' : 'fa-moon';
+        if(icon1) { icon1.classList.remove('fa-moon', 'fa-sun'); icon1.classList.add(newIcon); }
+        if(icon2) { icon2.classList.remove('fa-moon', 'fa-sun'); icon2.classList.add(newIcon); }
+    }
+
+    // --- UI NAVIGATION LOGIC ---
+    function scrollToSection(id) {
+        const element = document.getElementById(id);
+        const scrollArea = document.getElementById('main-scroll-area');
+        if(element) scrollArea.scrollTo({ top: element.offsetTop - 40, behavior: 'smooth' });
+        document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function showSection(section) {
+        document.getElementById('landing-nav').style.display = 'none';
+        document.getElementById('landing-section').style.display = 'none';
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('dashboard-layout').style.display = 'none';
+        
+        if(section === 'landing') { document.getElementById('landing-nav').style.display = 'flex'; document.getElementById('landing-section').style.display = 'block'; window.scrollTo(0,0); }
+        if(section === 'auth') { document.getElementById('landing-nav').style.display = 'flex'; document.getElementById('auth-section').style.display = 'block'; window.scrollTo(0,0); }
+        if(section === 'dashboard') { document.getElementById('dashboard-layout').style.display = 'grid'; loadDashboardStats(); }
+    }
+
+    function updateFileName(inputId, displayId) {
+        let file = document.getElementById(inputId).files[0];
+        if(file) document.getElementById(displayId).innerHTML = `<i class="fa-solid fa-check-circle"></i> Selected: ${file.name}`;
+    }
+
+    // --- LIVE VIDEO RECORDING (WEBRTC) LOGIC ---
+    let mediaRecorder;
+    let recordedChunks = [];
+    let videoBlob = null;
+    let stream = null;
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            let liveVideo = document.getElementById('live-video');
+            liveVideo.srcObject = stream;
+            
+            document.getElementById('cam-placeholder').style.display = 'none';
+            document.getElementById('playback-video').style.display = 'none';
+            liveVideo.style.display = 'block';
+            
+            document.getElementById('btn-start-rec').disabled = false;
+            document.getElementById('btn-start-cam').disabled = true;
+            document.getElementById('btn-video').disabled = true; // Disable analyze button
+        } catch (err) {
+            alert("Camera access denied! Please allow camera permissions in your browser.");
+        }
+    }
+
+    function startRecording() {
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        
+        mediaRecorder.ondataavailable = function(e) {
+            if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = function() {
+            videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+            let videoURL = URL.createObjectURL(videoBlob);
+            
+            // Hide live feed, show playback
+            document.getElementById('live-video').style.display = 'none';
+            document.getElementById('rec-dot').style.display = 'none';
+            let playback = document.getElementById('playback-video');
+            playback.src = videoURL;
+            playback.style.display = 'block';
+            
+            // Enable Analyze button
+            document.getElementById('btn-video').disabled = false;
+        };
+        
+        mediaRecorder.start();
+        document.getElementById('rec-dot').style.display = 'block';
+        document.getElementById('btn-start-rec').disabled = true;
+        document.getElementById('btn-stop-rec').disabled = false;
+    }
+
+    function stopRecording() {
+        mediaRecorder.stop();
+        // Stop all tracks to turn off webcam light
+        stream.getTracks().forEach(track => track.stop());
+        
+        document.getElementById('btn-stop-rec').disabled = true;
+        document.getElementById('btn-start-cam').disabled = false;
+    }
+
+
+    // --- KANBAN & TOAST NOTIFICATION LOGIC ---
+    function showToast() {
+        let toast = document.getElementById("toast");
+        toast.className = "show";
+        setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var targetCol = ev.target.closest('.kanban-column');
+        if(targetCol) {
+            targetCol.appendChild(document.getElementById(data));
+            updateKanbanCounts();
+            if(targetCol.id === 'col-shortlisted' || targetCol.id === 'col-interview') {
+                showToast();
+            }
+        }
+    }
+    function updateKanbanCounts() {
+        document.getElementById('cnt-applied').innerText = document.getElementById('col-applied').querySelectorAll('.kanban-card').length;
+        document.getElementById('cnt-shortlisted').innerText = document.getElementById('col-shortlisted').querySelectorAll('.kanban-card').length;
+        document.getElementById('cnt-interview').innerText = document.getElementById('col-interview').querySelectorAll('.kanban-card').length;
+        document.getElementById('cnt-hired').innerText = document.getElementById('col-hired').querySelectorAll('.kanban-card').length;
+    }
+
+    // --- HR CHAT LOGIC ---
+    function handleChatEnter(e) { if(e.key === 'Enter') sendChatMessage(); }
+    async function sendChatMessage() {
+        let inputField = document.getElementById('chat-input'); let msgText = inputField.value.trim();
+        if(!msgText) return;
+        let chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML += `<div class="chat-message msg-user">${msgText}</div>`; inputField.value = ""; chatBox.scrollTop = chatBox.scrollHeight;
+        document.getElementById('chat-typing').style.display = "block";
+        try {
+            let fd = new FormData(); fd.append("username", currentUser); fd.append("message", msgText);
+            let res = await fetch(`${backendURL}/chat_hr`, { method: "POST", body: fd });
+            let data = await res.json();
+            document.getElementById('chat-typing').style.display = "none";
+            chatBox.innerHTML += `<div class="chat-message msg-ai">${data.response}</div>`; chatBox.scrollTop = chatBox.scrollHeight;
+        } catch(e) { document.getElementById('chat-typing').style.display = "none"; chatBox.innerHTML += `<div class="chat-message msg-ai" style="color: red;">Error.</div>`; }
+    }
+
+    // --- API CALLS ---
+    async function registerUser() {
+        let u = document.getElementById("username").value; let p = document.getElementById("password").value;
+        let msg = document.getElementById("auth-msg");
+        if(!u || !p) { msg.innerText = "Enter credentials!"; return; }
+        let fd = new FormData(); fd.append("username", u); fd.append("password", p);
+        try {
+            let res = await fetch(`${backendURL}/register`, { method: "POST", body: fd });
+            if(res.ok) { msg.style.color = "var(--success)"; msg.innerHTML = 'Account Created! Please login.'; } 
+            else { msg.style.color = "var(--danger)"; msg.innerText = "Username exists!"; }
+        } catch (error) { msg.innerText = "Server error!"; }
+    }
+
+    async function loginUser() {
+        let u = document.getElementById("username").value; let p = document.getElementById("password").value;
+        if(!u || !p) return;
+        let fd = new FormData(); fd.append("username", u); fd.append("password", p);
+        try {
+            let res = await fetch(`${backendURL}/login`, { method: "POST", body: fd });
+            if (res.ok) { currentUser = u; document.getElementById("user-greeting").innerText = u; showSection('dashboard'); } 
+            else { alert("Invalid Credentials!"); }
+        } catch (error) { alert("Server error!"); } 
+    }
+
+    async function generateCoverLetter() {
+        let fileInput = document.getElementById("cl-resume").files[0];
+        let jd = document.getElementById("job-desc").value;
+        if (!fileInput || !jd) return alert("Select PDF and paste Job Description!");
+        let btn = document.getElementById("btn-cl"); let resBox = document.getElementById("cl-results");
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating with AI...'; btn.disabled = true;
+        resBox.style.display = "block"; resBox.innerHTML = "Generative AI is drafting a personalized cover letter...";
+        try {
+            let fd = new FormData(); fd.append("username", currentUser); fd.append("jd", jd); fd.append("file", fileInput);
+            let res = await fetch(`${backendURL}/generate_cover_letter`, { method: "POST", body: fd });
+            let data = await res.json();
+            resBox.innerHTML = `<b style="color: #ec4899;">Generated Cover Letter:</b><br><br>${data.cover_letter}`;
+            loadDashboardStats();
+        } catch (error) { resBox.innerHTML = "Error."; } finally { btn.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Generate Cover Letter'; btn.disabled = false; }
+    }
+
+    async function analyzeResume() {
+        let fileInput = document.getElementById("resumeFile").files[0];
+        if (!fileInput) return alert("Select a PDF file!");
+        let btn = document.getElementById("btn-resume"); let resBox = document.getElementById("resume-results");
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...'; btn.disabled = true;
+        resBox.style.display = "block"; resBox.innerHTML = "Running NLP Models...";
+        try {
+            let fd = new FormData(); fd.append("username", currentUser); fd.append("file", fileInput);
+            let res = await fetch(`${backendURL}/analyze_resume`, { method: "POST", body: fd });
+            let data = await res.json();
+            resBox.innerHTML = `🎯 Top Match: <b style="color:var(--primary);">${data.top_role}</b><br><br><span style="color:var(--danger); font-size: 0.9em;"><i class="fa-solid fa-triangle-exclamation"></i> <b>Missing Skills (Gap Analysis):</b> ${data.missing_skills.join(", ")}</span>`;
+            document.getElementById("resumeChartDiv").style.display = "block";
+            let ctx = document.getElementById('resumeChart').getContext('2d');
+            if(resumeChartInstance) resumeChartInstance.destroy();
+            resumeChartInstance = new Chart(ctx, { type: 'bar', data: { labels: Object.keys(data.scores), datasets: [{ label: 'Score (%)', data: Object.values(data.scores), backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            loadDashboardStats();
+        } catch (error) { resBox.innerHTML = "Error."; } finally { btn.innerHTML = 'Run AI NLP Match'; btn.disabled = false; }
+    }
+
+    // RECORDED VIDEO ANALYSIS
+    async function analyzeRecordedVideo() {
+        if (!videoBlob) return alert("Please record a video first!");
+        
+        // We create a File object from the Blob to send to backend just like a normal upload
+        let videoFile = new File([videoBlob], "live_interview.webm", { type: "video/webm" });
+        
+        let btn = document.getElementById("btn-video"); let resBox = document.getElementById("video-results");
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing Frames, Audio & Text...'; btn.disabled = true;
+        resBox.style.display = "grid"; resBox.style.borderLeftColor = "#eab308";
+        resBox.innerHTML = "<div style='grid-column: span 2;'><i class='fa-solid fa-cogs fa-spin'></i> AI is tracking eyes and extracting audio...</div>";
+        try {
+            let fd = new FormData(); 
+            fd.append("username", currentUser); 
+            fd.append("file", videoFile);
+            
+            let res = await fetch(`${backendURL}/analyze_video`, { method: "POST", body: fd });
+            let data = await res.json();
+            let proctorColor = data.is_suspicious ? "var(--danger)" : "var(--success)";
+            
+            resBox.innerHTML = `
+                <div>
+                    <div style="font-size: 1.4em; color: var(--text-main); margin-bottom: 20px;">AI Score: <b style="color: #eab308;">${data.overall_score}/100</b></div>
+                    <div style="margin-bottom: 10px; font-size: 0.85em;"><b>Confidence</b>: ${data.confidence}%</div>
+                    <div style="margin-bottom: 10px; font-size: 0.85em;"><b>Communication</b>: ${data.communication}%</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="padding: 15px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="color: var(--text-muted); font-size: 0.85em;">AI Proctoring Alert</div>
+                        <div style="font-weight: bold; color: ${proctorColor};">${data.proctoring_status}</div>
+                    </div>
+                </div>
+            `;
+            loadDashboardStats();
+        } catch (error) { resBox.innerHTML = "<div style='grid-column: span 2;'>Error.</div>"; } finally { btn.innerHTML = '<i class="fa-solid fa-microchip"></i> Start Deep AI Analysis'; btn.disabled = false; }
+    }
+
+    async function loadDashboardStats() {
+        if(!currentUser) return;
+        try {
+            let res = await fetch(`${backendURL}/user_dashboard?username=${currentUser}`); let data = await res.json();
+            let total = data.history.length; 
+            let resumes = data.history.filter(i => i.type === "Resume Scan" || i.type === "Resume").length;
+            let videos = data.history.filter(i => i.type === "Video Analysis").length; 
+            let genai = data.history.filter(i => i.type === "AI Generative").length; 
+            
+            document.getElementById('total-scans').innerText = total; 
+            document.getElementById('resume-count').innerText = resumes; 
+            document.getElementById('video-count').innerText = videos;
+            document.getElementById('genai-count').innerText = genai;
+        } catch(e) { console.log("Error loading stats"); }
+    }
+
+    function logout() { location.reload(); }
+</script>
+</body>
+</html>

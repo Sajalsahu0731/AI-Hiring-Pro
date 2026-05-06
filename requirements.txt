@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+pypdf2
+sentence-transformers
+scikit-learn
+bcrypt
+requests
+transformers
+pillow
